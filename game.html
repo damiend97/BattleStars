@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Battle Stars</title>
+	<script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+	<style>
+		* {
+			margin: 0px;
+			padding: 0px;
+		}
+	</style>
+</head>
+<body>
+	<script type="text/javascript">
+
+		// configuration
+		var config = {
+			// render type
+			type: Phaser.AUTO,
+			// game screen dimensions
+			width: 800,
+			height: 600,
+			// physics
+			physics: {
+				default: 'arcade',
+				arcade: {
+					// no gravity
+					gravity: { y : 0 },
+					debug: false
+				}
+			},
+			// scene
+			scene: {
+				preload: preload,
+				create: create,
+				update: update
+			}
+		};
+
+		// global vars
+		var player;
+		var enemy;
+		var bullets;
+		var enemyBullets;
+		var cursors;
+		var score = 0;
+		var scoreText;
+		var gameOver = false;
+		var lastFired = 0;
+
+		// game with predefined config options
+		var game = new Phaser.Game(config);
+
+		function preload() {
+			// images
+			this.load.image('background', 'https://examples.phaser.io/assets/skies/sky2.png');
+			this.load.image('player', 'https://examples.phaser.io/assets/sprites/shmup-ship.png');
+			this.load.image('enemy', 'https://examples.phaser.io/assets/sprites/space-baddie.png');
+			this.load.image('bullet', 'https://examples.phaser.io/assets/bullets/bullet19.png');
+			this.load.image('enemyBullet', 'https://examples.phaser.io/assets/bullets/bullet20.png');
+		}
+
+		function create() {
+			// render background
+			this.add.image(400, 300, 'background');
+
+			// render player
+			player = this.physics.add.sprite(380, 550, 'player');
+
+			// set collide world bounds for player
+			player.setCollideWorldBounds(true);
+
+			// render enemy
+        	enemy = this.physics.add.sprite(380, 50, 'enemy');
+
+        	// set collide world bounds for enemy
+        	enemy.setCollideWorldBounds(true);
+
+        	// set enemy bullet collider
+        	this.physics.add.collider(enemy, bullets, hitEnemy, null, this);
+
+        	// set player bullet collider
+
+        	// player bullet class ----------------------------------------------------
+    		var Bullet = new Phaser.Class({
+    			Extends: Phaser.GameObjects.Image,
+
+        		initialize:
+
+        		function Bullet (scene)
+        		{
+            		Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+
+            		this.speed = Phaser.Math.GetSpeed(400, 1);
+        		},
+
+        		fire: function (x, y)
+        		{
+            		this.setPosition(x, y - 50);
+
+            		this.setActive(true);
+            		this.setVisible(true);
+        		},
+
+        		update: function (time, delta)
+        		{
+            		this.y -= this.speed * delta;
+
+            		if (this.y < -50)
+            		{
+                		this.setActive(false);
+                		this.setVisible(false);
+            		}
+        		}
+    		});
+
+    		// player bullets
+    		bullets = this.add.group({
+        		classType: Bullet,
+        		maxSize: 10,
+        		runChildUpdate: true
+        	});
+
+
+        	// -----------------------------------------------------
+
+    		// enemy's bullets
+    		enemyBullets = this.physics.add.group();
+
+			// create cursor keys
+        	cursors = this.input.keyboard.createCursorKeys();
+
+        	// render score to screen
+        	scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+
+        	// configure player-bullet collision
+        	this.physics.add.collider(player, bullets, hitPlayer, null, this);
+
+        	// configure enemy-bullet collision
+        	this.physics.add.collider(enemy, bullets, hitEnemy, null, this);
+
+        	// ---------- enemy shoot every 3 seconds ----------------
+        	timedEvent = this.time.addEvent({
+				delay: 3000,
+				callback: enemyShoot,
+				callbackScope: this,
+				loop: true
+			});
+		}
+
+		function update(time, delta) {
+			// if gameOver = true
+			if (gameOver) {
+				// exit function (stop game)
+				return;
+			}
+
+
+
+        	// cursor events
+			if (cursors.left.isDown) {
+        		// move player left
+            	player.setVelocityX(-160);
+        	}
+        	else if (cursors.right.isDown) {
+        		// move player right
+           		player.setVelocityX(160);
+
+        	}
+        	else if (cursors.up.isDown) {
+        		// move player up
+        		player.setVelocityY(-160);
+        	}
+        	else if (cursors.down.isDown) {
+        		// move player down
+        		player.setVelocityY(160);
+        	}
+        	else {
+        		// stop player
+            	player.setVelocityX(0);
+            	player.setVelocityY(0);
+        	}
+
+        	if (cursors.space.isDown && time > lastFired) {
+        		var bullet = bullets.get();
+
+        		if (bullet)
+        		{
+            		bullet.fire(player.x, player.y);
+
+            		lastFired = time + 1000;
+        		}
+    		}
+		}
+
+
+		function enemyShoot() {
+			var enemyBullet = enemyBullets.create(enemy.x,enemy.y +20, 'enemyBullet');
+			enemyBullet.setVelocityY(160);
+		}
+
+		function hitPlayer() {
+			console.log('okay');
+		}
+
+		function hitEnemy() {
+			alert('hit!');
+		}
+
+		function resetBullet(bullet) {
+			bullet.kill();
+		}
+
+		function resetEnemyBullet(bullet) {
+			bullet.kill();
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	</script>
+</body>
+</html>

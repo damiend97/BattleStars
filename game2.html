@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Battle Stars 2</title>
+	<script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+		var config = {
+			type: Phaser.AUTO,
+			width: 800,
+			height: 600,
+			backgroundColor: '#00001a',
+			parent: 'battle-stars',
+			physics: {
+				default: 'arcade',
+				arcade: {
+					debug: false
+				}
+			},
+			scene: {
+				preload: preload,
+				create: create,
+				update: update
+			}
+		};
+
+		var bullets;
+		var alienBullets;
+		var player;
+		var aliens;
+		// player speed
+		var speed;
+		var cursors;
+		var lastFired = 0;
+		var level = 1;
+		var alienArray = [];
+		// instead of using alienArray.length
+		// couldn't find efficent way of removing specific alien from array
+		var alienCount = 0;
+
+		var game = new Phaser.Game(config);
+
+		function preload() {
+			this.load.image('player', 'https://examples.phaser.io/assets/games/asteroids/ship.png');
+			this.load.image('alien', 'https://examples.phaser.io/assets/games/asteroids/ship.png');
+			this.load.image('bullet', 'https://examples.phaser.io/assets/bullets/bullet19.png');
+			this.load.image('alienBullet', 'https://examples.phaser.io/assets/bullets/bullet20.png');
+		}
+
+		function create() {
+			var Bullet = new Phaser.Class({
+				Extends: Phaser.GameObjects.Image,
+
+				initialize:
+
+				function Bullet(scene) {
+					Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+
+					this.speed = Phaser.Math.GetSpeed(700, 1);
+				},
+
+				fire: function(x, y) {
+					this.setPosition(x, y - 50);
+
+					this.setActive(true);
+					this.setVisible(true);
+				},
+
+				update: function(time, delta) {
+					this.y -= this.speed * delta;
+
+					if (this.y < 0) {
+						this.destroy();
+					}
+				}
+			});
+
+			bullets = this.physics.add.group({
+				classType: Bullet,
+				maxSize: 10,
+				runChildUpdate: true
+			});
+
+			player = this.physics.add.sprite(400, 500, 'player');
+			player.setScale(1.5);
+			player.angle -= 90;
+			this.physics.add.collider(player, bullets, hitPlayer, null, this);
+			player.setCollideWorldBounds(true);
+
+
+			var AlienBullet = new Phaser.Class({
+				Extends: Phaser.GameObjects.Image,
+
+				initialize:
+
+				function Bullet(scene) {
+					Phaser.GameObjects.Image.call(this, scene, 0, 0, 'alienBullet');
+
+					this.speed = Phaser.Math.GetSpeed(700, 1);
+				},
+
+				fire: function(x, y) {
+					this.setPosition(x, y - 50);
+
+					this.setActive(true);
+					this.setVisible(true);
+				},
+
+				update: function(time, delta) {
+					this.y += this.speed * delta;
+
+					if (this.y < 0) {
+						this.destroy();
+					}
+				}
+			});
+
+			alienBullets = this.physics.add.group({
+				classType: AlienBullet,
+				runChildUpdate: true
+			});
+
+    		aliens = this.physics.add.group();
+    		aliens.enableBody = true;
+    		aliens.physicsBodyType = Phaser.Physics.ARCADE;
+    		this.physics.add.collider(aliens, bullets, hitAlien, null, this);
+
+    		createAliens(1);
+
+			cursors = this.input.keyboard.createCursorKeys();
+
+			speed = Phaser.Math.GetSpeed(200, 1);
+		}
+
+		function update(time, delta) {
+			if (cursors.left.isDown) {
+				player.x -= speed * delta;
+			}
+			else if (cursors.right.isDown) {
+				player.x += speed * delta;
+			}
+
+			if (cursors.space.isDown && time > lastFired) {
+				var bullet = bullets.get();
+
+				if (bullet) {
+					bullet.fire(player.x, player.y);
+
+					lastFired = time + 200;	
+				}
+			}
+
+		}
+
+		function createAliens(x) {
+			var alien = aliens.create((x*100), 100, 'alien');
+			alien.setCollideWorldBounds(true);
+			alienArray.push(alien);
+			alien.setScale(1.5);
+			alien.angle += 90;
+			alien.lives = 3;
+			alienCount += 1;
+		}
+
+		function alienAttack() {
+			
+		}
+
+		function hitPlayer() {
+		}
+
+		function hitAlien(alien, bullet) {
+			alien.lives -= 1;
+
+			console.log('current alien lives: ' + alien.lives);
+			console.log('aliens:  ' + alienCount);
+			console.log('level: ' + level);
+
+			if (alien.lives === 2) {
+				alien.setTint(0Xff8080);
+			}
+
+			else if (alien.lives === 1) {
+				alien.setTint(0Xff3333);
+			}
+
+			else if (alien.lives === 0) {
+				alien.destroy();
+				alienCount -= 1;
+
+				if (alienCount === 0) {
+					level += 1;
+
+					levelUp();
+				}
+			}
+
+			bullet.destroy()
+		}
+
+		function levelUp() {
+			console.log('aliens: ' + alienCount);
+			console.log('level: ' + level)
+
+			for (let i = 1; i < level + 1; i++) {
+				createAliens(i);
+			}
+		}
+	</script>
+</body>
+</html>
