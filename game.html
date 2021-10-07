@@ -1,35 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Battle Stars</title>
-	<script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+	<title>Battle Stars 3</title>
+	<script src="https://cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
 	<style>
 		* {
-			margin: 0px;
-			padding: 0px;
+			margin: 0;
+			padding: 0;
+			background: #111;
+			color: white;
+		}
+		#restart-button {
+			/* display: none; */
+			position: absolute;
+			z-index: 1000;
+			top: 50%;
+			margin-top: -25px;
+			left: 50%;
+			margin-left: -100px;
+			width: 200px;
+			height: 50px;
+			display: none;
+			justify-content: center;
+			align-items: center;
+		}
+		#restart-button:hover {
+			box-shadow: 2px 2px 5px rgb(0, 0, 92);
+			cursor: pointer;
 		}
 	</style>
 </head>
 <body>
-	<script type="text/javascript">
+<div id="restart-button">RESTART GAME</div>
+<script type="text/javascript">
 
-		// configuration
-		var config = {
-			// render type
+	document.getElementById('restart-button').addEventListener('click', () => {
+		location.reload();
+	})
+	var w = window.innerWidth;
+	var h = window.innerHeight;
+
+	var config = {
 			type: Phaser.AUTO,
-			// game screen dimensions
-			width: 800,
-			height: 600,
-			// physics
+			width: w,
+			height: h,
+			backgroundColor: '#00021a',
+			parent: 'battle-stars',
 			physics: {
 				default: 'arcade',
 				arcade: {
-					// no gravity
-					gravity: { y : 0 },
 					debug: false
 				}
 			},
-			// scene
 			scene: {
 				preload: preload,
 				create: create,
@@ -37,200 +59,241 @@
 			}
 		};
 
-		// global vars
-		var player;
-		var enemy;
-		var bullets;
-		var enemyBullets;
-		var cursors;
-		var score = 0;
-		var scoreText;
-		var gameOver = false;
-		var lastFired = 0;
+	var player;
+	var playerLife = 3;
+	var playerLifeText;
+	var bullets;
+	var lastFired = 0;
 
-		// game with predefined config options
-		var game = new Phaser.Game(config);
+	var asteroids;
+	var lastAsteroid = 0;
 
-		function preload() {
-			// images
-			this.load.image('background', 'https://examples.phaser.io/assets/skies/sky2.png');
-			this.load.image('player', 'https://examples.phaser.io/assets/sprites/shmup-ship.png');
-			this.load.image('enemy', 'https://examples.phaser.io/assets/sprites/space-baddie.png');
-			this.load.image('bullet', 'https://examples.phaser.io/assets/bullets/bullet19.png');
-			this.load.image('enemyBullet', 'https://examples.phaser.io/assets/bullets/bullet20.png');
-		}
+	var specials;
+	var lastSpecial = 0;
 
-		function create() {
-			// render background
-			this.add.image(400, 300, 'background');
+	var speed;
+	var cursors;
 
-			// render player
-			player = this.physics.add.sprite(380, 550, 'player');
+	var score = 0;
+	var scoreText;
 
-			// set collide world bounds for player
-			player.setCollideWorldBounds(true);
+	var level = 1;
+	var levelText;
 
-			// render enemy
-        	enemy = this.physics.add.sprite(380, 50, 'enemy');
+	var gameOver = false;
+	var gameOverText;
 
-        	// set collide world bounds for enemy
-        	enemy.setCollideWorldBounds(true);
+	var game = new Phaser.Game(config);
 
-        	// set enemy bullet collider
-        	this.physics.add.collider(enemy, bullets, hitEnemy, null, this);
+	function preload() {
+		this.load.image('player', 'https://examples.phaser.io/assets/games/asteroids/ship.png');
+		this.load.image('bullet', 'https://examples.phaser.io/assets/bullets/bullet19.png');
+		this.load.image('asteroid', 'https://examples.phaser.io/assets/games/asteroids/asteroid2.png');
+		this.load.image('special', 'https://examples.phaser.io/assets/particles/bubble.png');
+	}
 
-        	// set player bullet collider
+	function create() {
+		var Bullet = new Phaser.Class({
+			Extends: Phaser.GameObjects.Image,
 
-        	// player bullet class ----------------------------------------------------
-    		var Bullet = new Phaser.Class({
-    			Extends: Phaser.GameObjects.Image,
+			initialize:
 
-        		initialize:
+			function Bullet(scene) {
+				Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
 
-        		function Bullet (scene)
-        		{
-            		Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+				this.speed = Phaser.Math.GetSpeed(2000, 1);
+			},
 
-            		this.speed = Phaser.Math.GetSpeed(400, 1);
-        		},
+			fire: function(x, y) {
+				this.setPosition(x, y - 50);
 
-        		fire: function (x, y)
-        		{
-            		this.setPosition(x, y - 50);
+				this.setActive(true);
+				this.setVisible(true);
+			},
 
-            		this.setActive(true);
-            		this.setVisible(true);
-        		},
+			update: function(time, delta) {
+				this.y -= this.speed * delta;
 
-        		update: function (time, delta)
-        		{
-            		this.y -= this.speed * delta;
+				if (this.y < 0) {
+					this.destroy();
+				}
+			}
+		});
 
-            		if (this.y < -50)
-            		{
-                		this.setActive(false);
-                		this.setVisible(false);
-            		}
-        		}
-    		});
+		var Asteroid = new Phaser.Class({
+			Extends: Phaser.GameObjects.Image,
 
-    		// player bullets
-    		bullets = this.add.group({
-        		classType: Bullet,
-        		maxSize: 10,
-        		runChildUpdate: true
-        	});
+			initialize:
 
+			function Asteroid(scene) {
+				Phaser.GameObjects.Image.call(this, scene, 0, 0, 'asteroid');
 
-        	// -----------------------------------------------------
+				this.speed = Phaser.Math.GetSpeed(200, 1);
+			},
 
-    		// enemy's bullets
-    		enemyBullets = this.physics.add.group();
+			move: function(x,y) {
+				this.setPosition(x, y);
 
-			// create cursor keys
-        	cursors = this.input.keyboard.createCursorKeys();
+				this.setActive(true);
+				this.setVisible(true);
+			},
 
-        	// render score to screen
-        	scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+			update: function(time, delta) {
+				this.y += this.speed * delta;
 
-        	// configure player-bullet collision
-        	this.physics.add.collider(player, bullets, hitPlayer, null, this);
+				if (this.y > h) {
+					this.destroy();
+				}
+			}
+		});
 
-        	// configure enemy-bullet collision
-        	this.physics.add.collider(enemy, bullets, hitEnemy, null, this);
+		var Special = new Phaser.Class({
+			Extends: Phaser.GameObjects.Image,
 
-        	// ---------- enemy shoot every 3 seconds ----------------
-        	timedEvent = this.time.addEvent({
-				delay: 3000,
-				callback: enemyShoot,
-				callbackScope: this,
-				loop: true
-			});
-		}
+			initialize:
 
-		function update(time, delta) {
-			// if gameOver = true
+			function Special(scene) {
+				Phaser.GameObjects.Image.call(this, scene, 0, 0, 'special');
+
+				this.speed = Phaser.Math.GetSpeed(200, 1);
+			},
+
+			move: function(x,y) {
+				this.setPosition(x, y);
+
+				this.setActive(true);
+				this.setVisible(true);
+			},
+
+			update: function(time, delta) {
+				this.y += this.speed * delta;
+
+				if (this.y > h) {
+					this.destroy();
+				}
+			}
+		});
+
+		bullets = this.physics.add.group({
+			classType: Bullet,
+			runChildUpdate: true
+		});
+
+		asteroids = this.physics.add.group({
+			classType: Asteroid,
+			runChildUpdate: true
+		});
+
+		specials = this.physics.add.group({
+			classType: Special,
+			runChildUpdate: true
+		})
+
+		player = this.physics.add.sprite(400, 500, 'player');
+		player.setScale(1.5);
+		player.angle -= 90;
+		player.setCollideWorldBounds(true);
+
+		this.physics.add.collider(player, asteroids, hitPlayer, null, this);
+		this.physics.add.collider(player, specials, powerUpPlayer, null, this);
+		this.physics.add.collider(asteroids, bullets, hitAsteroid, null, this);
+		this.physics.add.collider(specials, bullets, powerUpBullets, null, this);
+
+		speed = Phaser.Math.GetSpeed(1000, 1);
+		cursors = this.input.keyboard.createCursorKeys();
+
+		scoreText = this.add.text(25, 5, 'Score: 0', { fontSize: '32px', fill: '#fff' });
+		levelText = this.add.text((w - 200), 5, 'Level: 1', { fontSize: '32px', fill: '#fff' });
+		playerLifeText = this.add.text((w - 200), 40, 'Life: 3', { fontSize: '32px', fill: '#fff' });
+		gameOverText = this.add.text(25,(h-125), '', { fontSize: '100px', fill: '#ff0' });
+
+	}
+
+	function update(time, delta) {
+
 			if (gameOver) {
-				// exit function (stop game)
+				document.getElementById('restart-button').style.display = "flex";
 				return;
 			}
 
-
-
-        	// cursor events
 			if (cursors.left.isDown) {
-        		// move player left
-            	player.setVelocityX(-160);
-        	}
-        	else if (cursors.right.isDown) {
-        		// move player right
-           		player.setVelocityX(160);
+				player.x -= speed * delta;
+			}
+			else if (cursors.right.isDown) {
+				player.x += speed * delta;
+			}
 
-        	}
-        	else if (cursors.up.isDown) {
-        		// move player up
-        		player.setVelocityY(-160);
-        	}
-        	else if (cursors.down.isDown) {
-        		// move player down
-        		player.setVelocityY(160);
-        	}
-        	else {
-        		// stop player
-            	player.setVelocityX(0);
-            	player.setVelocityY(0);
-        	}
+			if (cursors.space.isDown && time > lastFired) {
+				var bullet = bullets.get();
 
-        	if (cursors.space.isDown && time > lastFired) {
-        		var bullet = bullets.get();
+				if (bullet) {
+					bullet.fire(player.x, player.y);
 
-        		if (bullet)
-        		{
-            		bullet.fire(player.x, player.y);
+					lastFired = time + 50;	
+				}
+			}
 
-            		lastFired = time + 1000;
-        		}
-    		}
+			if (time > lastSpecial) {
+				var x = Phaser.Math.Between(0,w);
+				var special = specials.get();
+				special.move(x,100);
+				special.setScale(.5);
+
+				lastSpecial = time + 20000;
+
+			}
+
+			if (time > lastAsteroid) {
+				var x = Phaser.Math.Between(10,w);
+				var asteroid = asteroids.get();
+				asteroid.move(x,100);
+
+    			lastAsteroid = time + (1000 / level);
+			}
+		
+	}
+
+	function hitPlayer(player, asteroid) {
+		asteroid.destroy();
+		playerLife -= 1;
+		playerLifeText.setText('Life: ' + playerLife);
+
+		if (playerLife === 0) {
+			player.destroy();
+			gameOverText.setText('GAME OVER!');
+			gameOver = true;
+		}
+	}
+
+	function hitAsteroid(asteroid, bullet) {
+		asteroid.destroy();
+		score += 10;
+		scoreText.setText('Score: ' + score);
+
+		if (score === (level * 100)) {
+			level += 1;
+			levelText.setText('Level: ' + level);
+		}
+	}
+
+	// increase player life
+	function powerUpPlayer(player, special) {
+		special.destroy();
+
+		playerLife += 1;
+		playerLifeText.setText('Life: ' + playerLife);
+	}
+
+	// scatter bullets
+	function powerUpBullets(special, bullet) {
+		special.destroy();
+
+		for (let i = 0; i < 100; i++) {
+			var bullet = bullets.get();
+			bullet.fire(i*30, player.y);
 		}
 
-
-		function enemyShoot() {
-			var enemyBullet = enemyBullets.create(enemy.x,enemy.y +20, 'enemyBullet');
-			enemyBullet.setVelocityY(160);
-		}
-
-		function hitPlayer() {
-			console.log('okay');
-		}
-
-		function hitEnemy() {
-			alert('hit!');
-		}
-
-		function resetBullet(bullet) {
-			bullet.kill();
-		}
-
-		function resetEnemyBullet(bullet) {
-			bullet.kill();
-		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	</script>
+	}
+</script>
 </body>
 </html>
