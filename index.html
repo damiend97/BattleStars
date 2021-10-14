@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet"> 
+    <title>Battle Stars</title>
+    <style>
+        * {
+			margin: 0;
+			padding: 0;
+			background: #111;
+			color: white;
+		}
+		body {
+			font-family: 'Orbitron', sans-serif;
+		}
+        #landing-container {
+			height: 100vh;
+			width: 100%;
+		}
+		#welcome-text {
+			font-size: 5em;
+			font-weight: 500;
+			text-align: center;
+			width: 100%;
+			margin-top: 20px;
+            color: yellow;
+            text-shadow: 3px 3px 5px yellow;
+		}
+		#instruct-container {
+			width: 70%;
+			text-align: center;
+			margin-left: auto;
+			margin-right: auto;
+			margin-top: 30px;
+			font-size: 1.5em;
+		}
+        #instruct-container h3 {
+            color: gold;
+        }
+        #instruct-container i {
+            text-decoration: underline;
+            color: yellow;
+        }
+		#play-button {
+			width: 200px;
+			height: 50px;
+			font-size: 1.25em;
+			margin-left: auto;
+			margin-right: auto;
+			margin-top: 50px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			border: 1px solid gold;
+			border-radius: 5px;
+            color: gold;
+            transition: all .5s ease;
+		}
+        #play-button a {
+            text-decoration: none !important;
+            background: none !important;
+            transition: all .5s ease;
+        }
+		#play-button:hover {
+			background: gold;
+			cursor: pointer;
+		}
+        #play-button:hover a {
+            color: #2c2c2c;
+        }
+    </style>
+</head>
+<body>
+    <div id="landing-container">
+		<div id="welcome-text">Battle Stars</div>
+		<div id="instruct-container">
+			<h3>Instructions</h3>
+            <br><hr><br>
+            Shoot and evade the asteroids &nbsp;&nbsp;
+            <img src="https://examples.phaser.io/assets/games/asteroids/asteroid2.png" style="height: 30px; width: 30px;" alt="asteroid" /><br><br>
+
+            Shoot or collect powerups &nbsp;&nbsp;
+            <img src="https://examples.phaser.io/assets/particles/bubble.png" style="height: 30px; width: 30px;" alt="bubble" /><br><br>
+
+            Manuever your ship with <i>arrow keys</i>&nbsp;&nbsp;
+            <br><br>
+
+            Shoot your cannon with <i>spacebar</i>&nbsp;&nbsp;
+
+		</div>
+		<div id="play-button">
+			<a href="https://durandev.net/BattleStars/game.html">Play Game</a>
+		</div>
+	</div>
+</body>
+</html>

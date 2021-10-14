@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Battle Stars 3</title>
+	<title>Battle Stars</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet"> 
 	<script src="https://cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
 	<style>
 		* {
@@ -9,6 +12,30 @@
 			padding: 0;
 			background: #111;
 			color: white;
+		}
+		body {
+			font-family: 'Orbitron', sans-serif;
+		}
+		#exit-button {
+			z-index: 1000;
+			position: absolute;
+			right: 50px;
+			bottom: 25px;
+			width: 100px;
+			color: white;
+			/* border: 1px solid yellow; */
+			background: yellow;
+			height: 25px;
+			padding: 5px;
+			display: flex;
+			justify-content: center;
+			align-items: center;;
+		}
+		#exit-button a {
+			text-decoration: none;
+			background: yellow;
+			color: #2c2c2c;
+			font-weight: bolder;
 		}
 		#restart-button {
 			/* display: none; */
@@ -25,275 +52,275 @@
 			align-items: center;
 		}
 		#restart-button:hover {
-			box-shadow: 2px 2px 5px rgb(0, 0, 92);
+			box-shadow: 2px 2px 5px yellow !important;
 			cursor: pointer;
 		}
 	</style>
 </head>
 <body>
-<div id="restart-button">RESTART GAME</div>
-<script type="text/javascript">
-
-	document.getElementById('restart-button').addEventListener('click', () => {
-		location.reload();
-	})
-	var w = window.innerWidth;
-	var h = window.innerHeight;
-
-	var config = {
-			type: Phaser.AUTO,
-			width: w,
-			height: h,
-			backgroundColor: '#00021a',
-			parent: 'battle-stars',
-			physics: {
-				default: 'arcade',
-				arcade: {
-					debug: false
-				}
-			},
-			scene: {
-				preload: preload,
-				create: create,
-				update: update
-			}
-		};
-
-	var player;
-	var playerLife = 3;
-	var playerLifeText;
-	var bullets;
-	var lastFired = 0;
-
-	var asteroids;
-	var lastAsteroid = 0;
-
-	var specials;
-	var lastSpecial = 0;
-
-	var speed;
-	var cursors;
-
-	var score = 0;
-	var scoreText;
-
-	var level = 1;
-	var levelText;
-
-	var gameOver = false;
-	var gameOverText;
-
-	var game = new Phaser.Game(config);
-
-	function preload() {
-		this.load.image('player', 'https://examples.phaser.io/assets/games/asteroids/ship.png');
-		this.load.image('bullet', 'https://examples.phaser.io/assets/bullets/bullet19.png');
-		this.load.image('asteroid', 'https://examples.phaser.io/assets/games/asteroids/asteroid2.png');
-		this.load.image('special', 'https://examples.phaser.io/assets/particles/bubble.png');
-	}
-
-	function create() {
-		var Bullet = new Phaser.Class({
-			Extends: Phaser.GameObjects.Image,
-
-			initialize:
-
-			function Bullet(scene) {
-				Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
-
-				this.speed = Phaser.Math.GetSpeed(2000, 1);
-			},
-
-			fire: function(x, y) {
-				this.setPosition(x, y - 50);
-
-				this.setActive(true);
-				this.setVisible(true);
-			},
-
-			update: function(time, delta) {
-				this.y -= this.speed * delta;
-
-				if (this.y < 0) {
-					this.destroy();
-				}
-			}
-		});
-
-		var Asteroid = new Phaser.Class({
-			Extends: Phaser.GameObjects.Image,
-
-			initialize:
-
-			function Asteroid(scene) {
-				Phaser.GameObjects.Image.call(this, scene, 0, 0, 'asteroid');
-
-				this.speed = Phaser.Math.GetSpeed(200, 1);
-			},
-
-			move: function(x,y) {
-				this.setPosition(x, y);
-
-				this.setActive(true);
-				this.setVisible(true);
-			},
-
-			update: function(time, delta) {
-				this.y += this.speed * delta;
-
-				if (this.y > h) {
-					this.destroy();
-				}
-			}
-		});
-
-		var Special = new Phaser.Class({
-			Extends: Phaser.GameObjects.Image,
-
-			initialize:
-
-			function Special(scene) {
-				Phaser.GameObjects.Image.call(this, scene, 0, 0, 'special');
-
-				this.speed = Phaser.Math.GetSpeed(200, 1);
-			},
-
-			move: function(x,y) {
-				this.setPosition(x, y);
-
-				this.setActive(true);
-				this.setVisible(true);
-			},
-
-			update: function(time, delta) {
-				this.y += this.speed * delta;
-
-				if (this.y > h) {
-					this.destroy();
-				}
-			}
-		});
-
-		bullets = this.physics.add.group({
-			classType: Bullet,
-			runChildUpdate: true
-		});
-
-		asteroids = this.physics.add.group({
-			classType: Asteroid,
-			runChildUpdate: true
-		});
-
-		specials = this.physics.add.group({
-			classType: Special,
-			runChildUpdate: true
+	<div id="restart-button">RESTART GAME</div>
+	<div id="exit-button"><a href="https://durandev.net/BattleStars/">Exit Game</a></div>
+	<script type="text/javascript">
+		document.getElementById('restart-button').addEventListener('click', () => {
+			location.reload();
 		})
+		var w = window.innerWidth;
+		var h = window.innerHeight;
 
-		player = this.physics.add.sprite(400, 500, 'player');
-		player.setScale(1.5);
-		player.angle -= 90;
-		player.setCollideWorldBounds(true);
-
-		this.physics.add.collider(player, asteroids, hitPlayer, null, this);
-		this.physics.add.collider(player, specials, powerUpPlayer, null, this);
-		this.physics.add.collider(asteroids, bullets, hitAsteroid, null, this);
-		this.physics.add.collider(specials, bullets, powerUpBullets, null, this);
-
-		speed = Phaser.Math.GetSpeed(1000, 1);
-		cursors = this.input.keyboard.createCursorKeys();
-
-		scoreText = this.add.text(25, 5, 'Score: 0', { fontSize: '32px', fill: '#fff' });
-		levelText = this.add.text((w - 200), 5, 'Level: 1', { fontSize: '32px', fill: '#fff' });
-		playerLifeText = this.add.text((w - 200), 40, 'Life: 3', { fontSize: '32px', fill: '#fff' });
-		gameOverText = this.add.text(25,(h-125), '', { fontSize: '100px', fill: '#ff0' });
-
-	}
-
-	function update(time, delta) {
-
-			if (gameOver) {
-				document.getElementById('restart-button').style.display = "flex";
-				return;
-			}
-
-			if (cursors.left.isDown) {
-				player.x -= speed * delta;
-			}
-			else if (cursors.right.isDown) {
-				player.x += speed * delta;
-			}
-
-			if (cursors.space.isDown && time > lastFired) {
-				var bullet = bullets.get();
-
-				if (bullet) {
-					bullet.fire(player.x, player.y);
-
-					lastFired = time + 50;	
+		var config = {
+				type: Phaser.AUTO,
+				width: w,
+				height: h,
+				backgroundColor: '#00021a',
+				parent: 'battle-stars',
+				physics: {
+					default: 'arcade',
+					arcade: {
+						debug: false
+					}
+				},
+				scene: {
+					preload: preload,
+					create: create,
+					update: update
 				}
-			}
+			};
 
-			if (time > lastSpecial) {
-				var x = Phaser.Math.Between(0,w);
-				var special = specials.get();
-				special.move(x,100);
-				special.setScale(.5);
+		var player;
+		var playerLife = 3;
+		var playerLifeText;
+		var bullets;
+		var lastFired = 0;
 
-				lastSpecial = time + 20000;
+		var asteroids;
+		var lastAsteroid = 0;
 
-			}
+		var specials;
+		var lastSpecial = 0;
 
-			if (time > lastAsteroid) {
-				var x = Phaser.Math.Between(10,w);
-				var asteroid = asteroids.get();
-				asteroid.move(x,100);
+		var speed;
+		var cursors;
 
-    			lastAsteroid = time + (1000 / level);
-			}
-		
-	}
+		var score = 0;
+		var scoreText;
 
-	function hitPlayer(player, asteroid) {
-		asteroid.destroy();
-		playerLife -= 1;
-		playerLifeText.setText('Life: ' + playerLife);
+		var level = 1;
+		var levelText;
 
-		if (playerLife === 0) {
-			player.destroy();
-			gameOverText.setText('GAME OVER!');
-			gameOver = true;
-		}
-	}
+		var gameOver = false;
+		var gameOverText;
 
-	function hitAsteroid(asteroid, bullet) {
-		asteroid.destroy();
-		score += 10;
-		scoreText.setText('Score: ' + score);
+		var game = new Phaser.Game(config);
 
-		if (score === (level * 100)) {
-			level += 1;
-			levelText.setText('Level: ' + level);
-		}
-	}
-
-	// increase player life
-	function powerUpPlayer(player, special) {
-		special.destroy();
-
-		playerLife += 1;
-		playerLifeText.setText('Life: ' + playerLife);
-	}
-
-	// scatter bullets
-	function powerUpBullets(special, bullet) {
-		special.destroy();
-
-		for (let i = 0; i < 100; i++) {
-			var bullet = bullets.get();
-			bullet.fire(i*30, player.y);
+		function preload() {
+			this.load.image('player', 'https://examples.phaser.io/assets/games/asteroids/ship.png');
+			this.load.image('bullet', 'https://examples.phaser.io/assets/bullets/bullet19.png');
+			this.load.image('asteroid', 'https://examples.phaser.io/assets/games/asteroids/asteroid2.png');
+			this.load.image('special', 'https://examples.phaser.io/assets/particles/bubble.png');
 		}
 
-	}
-</script>
+		function create() {
+			var Bullet = new Phaser.Class({
+				Extends: Phaser.GameObjects.Image,
+
+				initialize:
+
+				function Bullet(scene) {
+					Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
+
+					this.speed = Phaser.Math.GetSpeed(2000, 1);
+				},
+
+				fire: function(x, y) {
+					this.setPosition(x, y - 50);
+
+					this.setActive(true);
+					this.setVisible(true);
+				},
+
+				update: function(time, delta) {
+					this.y -= this.speed * delta;
+
+					if (this.y < 0) {
+						this.destroy();
+					}
+				}
+			});
+
+			var Asteroid = new Phaser.Class({
+				Extends: Phaser.GameObjects.Image,
+
+				initialize:
+
+				function Asteroid(scene) {
+					Phaser.GameObjects.Image.call(this, scene, 0, 0, 'asteroid');
+
+					this.speed = Phaser.Math.GetSpeed(200, 1);
+				},
+
+				move: function(x,y) {
+					this.setPosition(x, y);
+
+					this.setActive(true);
+					this.setVisible(true);
+				},
+
+				update: function(time, delta) {
+					this.y += this.speed * delta;
+
+					if (this.y > h) {
+						this.destroy();
+					}
+				}
+			});
+
+			var Special = new Phaser.Class({
+				Extends: Phaser.GameObjects.Image,
+
+				initialize:
+
+				function Special(scene) {
+					Phaser.GameObjects.Image.call(this, scene, 0, 0, 'special');
+
+					this.speed = Phaser.Math.GetSpeed(200, 1);
+				},
+
+				move: function(x,y) {
+					this.setPosition(x, y);
+
+					this.setActive(true);
+					this.setVisible(true);
+				},
+
+				update: function(time, delta) {
+					this.y += this.speed * delta;
+
+					if (this.y > h) {
+						this.destroy();
+					}
+				}
+			});
+
+			bullets = this.physics.add.group({
+				classType: Bullet,
+				runChildUpdate: true
+			});
+
+			asteroids = this.physics.add.group({
+				classType: Asteroid,
+				runChildUpdate: true
+			});
+
+			specials = this.physics.add.group({
+				classType: Special,
+				runChildUpdate: true
+			})
+
+			player = this.physics.add.sprite(400, 500, 'player');
+			player.setScale(1.5);
+			player.angle -= 90;
+			player.setCollideWorldBounds(true);
+
+			this.physics.add.collider(player, asteroids, hitPlayer, null, this);
+			this.physics.add.collider(player, specials, powerUpPlayer, null, this);
+			this.physics.add.collider(asteroids, bullets, hitAsteroid, null, this);
+			this.physics.add.collider(specials, bullets, powerUpBullets, null, this);
+
+			speed = Phaser.Math.GetSpeed(1000, 1);
+			cursors = this.input.keyboard.createCursorKeys();
+
+			scoreText = this.add.text(25, 5, 'Score: 0', { fontSize: '32px', fill: '#fff' });
+			levelText = this.add.text((w - 200), 5, 'Level: 1', { fontSize: '32px', fill: '#fff' });
+			playerLifeText = this.add.text((w - 200), 40, 'Life: 3', { fontSize: '32px', fill: '#fff' });
+			gameOverText = this.add.text(25,(h-125), '', { fontSize: '100px', fill: '#ff0' });
+
+		}
+
+		function update(time, delta) {
+
+				if (gameOver) {
+					document.getElementById('restart-button').style.display = "flex";
+					return;
+				}
+
+				if (cursors.left.isDown) {
+					player.x -= speed * delta;
+				}
+				else if (cursors.right.isDown) {
+					player.x += speed * delta;
+				}
+
+				if (cursors.space.isDown && time > lastFired) {
+					var bullet = bullets.get();
+
+					if (bullet) {
+						bullet.fire(player.x, player.y);
+
+						lastFired = time + 50;	
+					}
+				}
+
+				if (time > lastSpecial) {
+					var x = Phaser.Math.Between(0,w);
+					var special = specials.get();
+					special.move(x,100);
+					special.setScale(.5);
+
+					lastSpecial = time + 20000;
+
+				}
+
+				if (time > lastAsteroid) {
+					var x = Phaser.Math.Between(10,w);
+					var asteroid = asteroids.get();
+					asteroid.move(x,100);
+
+					lastAsteroid = time + (1000 / level);
+				}
+			
+		}
+
+		function hitPlayer(player, asteroid) {
+			asteroid.destroy();
+			playerLife -= 1;
+			playerLifeText.setText('Life: ' + playerLife);
+
+			if (playerLife === 0) {
+				player.destroy();
+				gameOverText.setText('GAME OVER!');
+				gameOver = true;
+			}
+		}
+
+		function hitAsteroid(asteroid, bullet) {
+			asteroid.destroy();
+			score += 10;
+			scoreText.setText('Score: ' + score);
+
+			if (score === (level * 100)) {
+				level += 1;
+				levelText.setText('Level: ' + level);
+			}
+		}
+
+		// increase player life
+		function powerUpPlayer(player, special) {
+			special.destroy();
+
+			playerLife += 1;
+			playerLifeText.setText('Life: ' + playerLife);
+		}
+
+		// scatter bullets
+		function powerUpBullets(special, bullet) {
+			special.destroy();
+
+			for (let i = 0; i < 100; i++) {
+				var bullet = bullets.get();
+				bullet.fire(i*30, player.y);
+			}
+
+		}
+	</script>
 </body>
 </html>
