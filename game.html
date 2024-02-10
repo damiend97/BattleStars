@@ -113,10 +113,10 @@
 		var game = new Phaser.Game(config);
 
 		function preload() {
-			this.load.image('player', 'https://examples.phaser.io/assets/games/asteroids/ship.png');
-			this.load.image('bullet', 'https://examples.phaser.io/assets/bullets/bullet19.png');
-			this.load.image('asteroid', 'https://examples.phaser.io/assets/games/asteroids/asteroid2.png');
-			this.load.image('special', 'https://examples.phaser.io/assets/particles/bubble.png');
+			this.load.image('player', 'https://durandev.net/BattleStars/ship.png');
+			this.load.image('bullet', 'https://durandev.net/BattleStars/bullet.png');
+			this.load.image('asteroid', 'https://durandev.net/BattleStars/asteroid.png');
+			this.load.image('special', 'https://durandev.net/BattleStars/bubble.png');
 		}
 
 		function create() {
@@ -216,9 +216,8 @@
 				runChildUpdate: true
 			})
 
-			player = this.physics.add.sprite(400, 500, 'player');
-			player.setScale(1.5);
-			player.angle -= 90;
+			player = this.physics.add.sprite(500, 800, 'player');
+			player.setScale(.5);
 			player.setCollideWorldBounds(true);
 
 			this.physics.add.collider(player, asteroids, hitPlayer, null, this);

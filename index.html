@@ -21,6 +21,9 @@
         #landing-container {
 			height: 100vh;
 			width: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
 		}
 		#welcome-text {
 			font-size: 5em;
@@ -38,6 +41,9 @@
 			margin-right: auto;
 			margin-top: 30px;
 			font-size: 1.5em;
+		}
+		.flex-wrapper {
+			width: 80%;
 		}
         #instruct-container h3 {
             color: gold;
@@ -77,24 +83,26 @@
 </head>
 <body>
     <div id="landing-container">
-		<div id="welcome-text">Battle Stars</div>
-		<div id="instruct-container">
-			<h3>Instructions</h3>
-            <br><hr><br>
-            Shoot and evade the asteroids &nbsp;&nbsp;
-            <img src="https://examples.phaser.io/assets/games/asteroids/asteroid2.png" style="height: 30px; width: 30px;" alt="asteroid" /><br><br>
+		<div class="flex-wrapper">
+			<div id="welcome-text">Battle Stars</div>
+			<div id="instruct-container">
+				<h3>Instructions</h3>
+				<br><hr><br>
+				Shoot and evade the asteroids &nbsp;&nbsp;
+				<img src="https://durandev.net/BattleStars/asteroid.png" style="height: 30px; width: 30px;" alt="asteroid" /><br><br>
 
-            Shoot or collect powerups &nbsp;&nbsp;
-            <img src="https://examples.phaser.io/assets/particles/bubble.png" style="height: 30px; width: 30px;" alt="bubble" /><br><br>
+				Shoot or collect powerups &nbsp;&nbsp;
+				<img src="https://durandev.net/BattleStars/bubble.png" style="height: 30px; width: 30px;" alt="bubble" /><br><br>
 
-            Manuever your ship with <i>arrow keys</i>&nbsp;&nbsp;
-            <br><br>
+				Manuever your ship with <i>arrow keys</i>&nbsp;&nbsp;
+				<br><br>
 
-            Shoot your cannon with <i>spacebar</i>&nbsp;&nbsp;
+				Shoot your cannon with <i>spacebar</i>&nbsp;&nbsp;
 
-		</div>
-		<div id="play-button">
-			<a href="https://durandev.net/BattleStars/game.html">Play Game</a>
+			</div>
+			<div id="play-button">
+				<a href="https://durandev.net/BattleStars/game.html">Play Game</a>
+			</div>
 		</div>
 	</div>
 </body>
